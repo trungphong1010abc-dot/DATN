@@ -1,0 +1,22 @@
+{
+  "condition": "CHE",
+  "port": "COM6",
+  "baudrate": 9600,
+  "requested_samples": 100,
+  "valid_samples": 100,
+  "complete": true,
+  "valid_for_analysis": true,
+  "interrupted": false,
+  "invalid_lines": 0,
+  "sequence_anomalies": {
+    "jump": 0,
+    "duplicate": 0,
+    "decrease": 0
+  },
+  "started_pc": "2026-10-08T21:35:22+07:00",
+  "finished_pc": "2026-10-08T21:36:12+07:00",
+  "elapsed_seconds": 49.926,
+  "distance_cm": null,
+  "light_mode": null,
+  "timestamp_note": "timestamp_pc la thoi gian laptop nhan dong, khong phai thoi diem STM32 lay mau."
+}

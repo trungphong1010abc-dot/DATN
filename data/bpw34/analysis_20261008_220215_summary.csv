@@ -1,0 +1,4 @@
+condition,source_file,valid_samples,L_mean,L_min,L_max,L_peak_to_peak,L_sample_stdev,count_L_0,count_L_4095,seq_jump,seq_duplicate,seq_decrease
+CHE,che_20261008_213522.csv,100,2043.060,1979,2099,120,19.874,0,0,0,0,0
+PHONG,phong_20261008_214718.csv,100,2052.490,2004,2095,91,32.126,0,0,0,0,0
+DEN,den_20261008_215252.csv,100,2247.320,2208,2303,95,30.745,0,0,0,0,0
