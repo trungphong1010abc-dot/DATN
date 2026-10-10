@@ -2,7 +2,19 @@
 
 ## Trạng thái hiện tại
 
-Đã hoàn thành **CHE**, **PHONG** và **DEN**, mỗi điều kiện có 100 mẫu hợp lệ. Kết quả tổng hợp cuối nằm trong `data/bpw34/analysis_20261008_220215_report.md` và `analysis_20261008_220215_summary.csv`.
+Đã thu đủ CHE, PHONG và DEN sau khi sửa phần cứng, mỗi điều kiện 100 mẫu. Các bước bên dưới được giữ để làm lại phép đo khi cần.
+
+| Điều kiện | File gốc | Trung bình L | Min–max | Đỉnh–đỉnh | Độ lệch chuẩn mẫu |
+|---|---|---:|---|---:|---:|
+| CHE | `che_20261010_162131.csv` | 2066.100 | 1696–2624 | 928 | 145.009 |
+| PHONG | `phong_20261010_162632.csv` | 2115.160 | 2048–2159 | 111 | 33.590 |
+| DEN | `den_20261010_163145.csv` | 2394.010 | 2288–2559 | 271 | 81.199 |
+
+Đơn vị số liệu L là count ADC. DEN dùng đèn mức 1, cách 20 cm. Cả ba phiên không có dòng lỗi, bất thường SEQ hoặc mẫu L chạm 0/4095.
+
+DEN cao hơn PHONG trung bình 278.850 count và hai khoảng không chồng lấn. DEN cao hơn CHE 327.910 count nhưng vẫn chồng lấn khoảng CHE, do CHE dao động lớn. PHONG cao hơn CHE 49.060 count và cũng chồng lấn. Nhánh quang có phản ứng với đèn so với nền phòng, nhưng chưa xác nhận mức nền che ổn định; nguyên nhân dao động cần kiểm tra riêng.
+
+Kết quả đầy đủ, công thức và giải thích nằm trong `data/bpw34/analysis_20261008_220215_report.md`; bảng tổng hợp là `analysis_20261008_220215_summary.csv`. Tên hai file được giữ nguyên dù dữ liệu đo ngày 10/10/2026.
 
 ## Trước mỗi lần đo
 
@@ -33,7 +45,7 @@ Không mặc định lần sau vẫn là COM6. Nếu không biết cổng nào:
 2. Cắm lại và xem COM nào xuất hiện.
 3. Chọn COM đó.
 
-## CHE đã hoàn thành
+## Đo CHE (đã thu)
 
 1. Che kín hoàn toàn mặt nhận sáng của BPW34 bằng vật không xuyên sáng.
 2. Không chạm hoặc làm lệch chân và dây cảm biến.
@@ -47,7 +59,7 @@ Không mặc định lần sau vẫn là COM6. Nếu không biết cổng nào:
 5. Chọn COM của USB–RS485 và giữ nguyên vật che đến khi đủ `100/100`.
 6. Hoàn thành khi công cụ báo `DU 100 MAU`.
 
-## PHONG đã hoàn thành
+## Đo PHONG (đã thu)
 
 1. Bỏ vật đang che BPW34.
 2. Giữ nguyên vị trí và hướng của cảm biến.
@@ -74,7 +86,7 @@ Ket qua: DU 100 MAU
 
 Khi thấy `DU 100 MAU`, phép đo PHONG đã hoàn thành.
 
-## DEN đã hoàn thành
+## Đo DEN (đã thu)
 
 1. Đặt đèn pin cách BPW34 khoảng 20 cm.
 2. Giữ cố định khoảng cách, hướng chiếu và mức sáng.

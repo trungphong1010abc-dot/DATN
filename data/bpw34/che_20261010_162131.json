@@ -1,6 +1,6 @@
 {
-  "condition": "DEN",
-  "port": "COM6",
+  "condition": "CHE",
+  "port": "COM9",
   "baudrate": 9600,
   "requested_samples": 100,
   "valid_samples": 100,
@@ -13,10 +13,10 @@
     "duplicate": 0,
     "decrease": 0
   },
-  "started_pc": "2026-10-08T21:52:52+07:00",
-  "finished_pc": "2026-10-08T21:53:42+07:00",
-  "elapsed_seconds": 49.95,
-  "distance_cm": 20.0,
-  "light_mode": "muc 1",
+  "started_pc": "2026-10-10T16:21:31+07:00",
+  "finished_pc": "2026-10-10T16:22:21+07:00",
+  "elapsed_seconds": 49.763,
+  "distance_cm": null,
+  "light_mode": null,
   "timestamp_note": "timestamp_pc la thoi gian laptop nhan dong, khong phai thoi diem STM32 lay mau."
 }
