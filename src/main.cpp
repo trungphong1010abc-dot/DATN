@@ -53,16 +53,12 @@ bool popBlock(Block &out) {
 }
 
 void transmit(const char *text) {
-  digitalWrite(PB0, HIGH); // EN nối chung DE và /RE trên module MAX3485 của node
-  delayMicroseconds(10);
+  // MAX13487E module handles direction automatically.
   rs485.print(text);
   rs485.flush(); // Lõi Arduino STM32 chờ truyền hoàn tất (cờ TC).
-  digitalWrite(PB0, LOW);
 }
 
 void setup() {
-  pinMode(PB0, OUTPUT);
-  digitalWrite(PB0, LOW);
   pinMode(PA0, INPUT_ANALOG);
   pinMode(PA1, INPUT_ANALOG);
   analogReadResolution(12);

@@ -1,10 +1,11 @@
-"""Capture real node reports through the ESP32 gateway into six-column CSV."""
+"""Capture real node reports directly through a USB-RS485 adapter into six-column CSV."""
 from __future__ import annotations
 import argparse
 import csv
 from datetime import datetime
 from pathlib import Path
 import time
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES = {
@@ -40,6 +41,9 @@ def run() -> int:
     import serial
     from serial.tools import list_ports
 
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(line_buffering=True)
+
     parser = argparse.ArgumentParser(description="Lưu test module: mỗi trường hợp một CSV, mỗi giây một dòng.")
     parser.add_argument("case", nargs="?", choices=tuple(CASES))
     parser.add_argument("--port")
@@ -55,7 +59,7 @@ def run() -> int:
     if not args.port:
         for port in list_ports.comports():
             print(f"{port.device}: {port.description}")
-        args.port = input("Nhập COM của GATEWAY (ví dụ COM3): ").strip()
+        args.port = input("Nhập COM của USB–RS485 CH340 (ví dụ COM3): ").strip()
     stem, label, condition = CASES[case]
     print(f"Chuẩn bị: {condition}. Đóng Serial Monitor trước khi mở cổng.")
     print("Node phải khởi động với LED TẮT trong lúc đo nền (~1 giây).")
@@ -63,25 +67,33 @@ def run() -> int:
     connection = None
     output = None
     try:
+        print(f"Đang mở {args.port} ở 115200 baud...", flush=True)
         connection = serial.Serial(args.port, 115200, timeout=0.2)
-        # Opening the gateway port can reset ESP32. Warm up before asking to start.
+        print("Đã mở COM. Terminal này vừa hiển thị số liệu vừa lưu CSV; không mở Serial Monitor riêng.", flush=True)
+        # Allow the adapter connection to settle before starting the capture.
         time.sleep(2)
         input("Khi đã đặt đúng tải và trạng thái LED, nhấn Enter để ghi: ")
         connection.reset_input_buffer()
         # Skip one complete report so the saved interval starts after Enter.
         deadline = time.monotonic() + 10
+        last_message = "Không nhận được byte dữ liệu nào."
+        print("Đang chờ bản tin trực tiếp từ node qua USB–RS485.", flush=True)
         while True:
             text = connection.readline().decode("ascii", errors="replace").strip()
+            if text:
+                last_message = text
+                print(f"[Nhận từ node] {text}", flush=True)
             try:
                 warmup = parse_frame(text)
             except (ValueError, UnicodeError):
                 if time.monotonic() >= deadline:
-                    raise RuntimeError("Không có bản tin hợp lệ từ node trong 10 giây.")
+                    raise RuntimeError(f"Không có bản tin hợp lệ từ node trong 10 giây. Thông báo cuối: {last_message}")
                 continue
             previous = warmup[:2]
             break
         output_dir.mkdir(parents=True, exist_ok=True)
         output = output_dir / f"{stem}_{datetime.now():%Y%m%d_%H%M%S_%f}.csv"
+        print(f"CSV đang cập nhật: {output}", flush=True)
         saved = 0
         with output.open("x", newline="", encoding="utf-8-sig") as stream:
             # Semicolon delimiter fits Vietnamese Excel; decimal comma.
@@ -92,6 +104,8 @@ def run() -> int:
             while saved < args.seconds:
                 text = connection.readline().decode("ascii", errors="replace").strip()
                 if not text or text.startswith("#"):
+                    if text:
+                        print(f"[Node] {text}", flush=True)
                     if time.monotonic() >= deadline:
                         raise RuntimeError("Mất bản tin 5 giây; dừng, giữ nguyên số liệu đã thu.")
                     continue
@@ -110,7 +124,7 @@ def run() -> int:
                        f"{mv / 1000:.3f}".replace(".", ","), flashes, "Có" if alarm else "Không"]
                 writer.writerow(row); stream.flush()
                 saved += 1
-                print(f"{saved}/{args.seconds}: I={ma/1000:.3f} A | quang đỉnh={mv/1000:.3f} V | chớp={flashes} | cảnh báo={row[-1]}")
+                print(f"{row[0]} | {label} | I={ma/1000:.3f} A | quang đỉnh={mv/1000:.3f} V | chớp={flashes} | cảnh báo={row[-1]} | đã lưu {saved}/{args.seconds}", flush=True)
         print(f"HOÀN TẤT: {output}")
         return 0
     except (serial.SerialException, OSError, RuntimeError) as exc:

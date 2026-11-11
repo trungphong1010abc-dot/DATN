@@ -1,35 +1,34 @@
-# Test nhanh toàn hệ thống module
+# Test nhanh module node
 
-Node **Blue Pill STM32F103C8 + MAX3485** → RS485 → gateway **ESP32-WROOM-32 + MAX13487E** → USB → Python trên laptop → CSV mở bằng Excel.
+Node **Blue Pill STM32F103C8 + MAX13487E** → **USB–RS485 CH340** → laptop hiển thị số liệu và lưu CSV mở bằng Excel.
 
 Mỗi trường hợp tạo một file riêng, mặc định 20 dòng, một báo cáo mỗi giây. Số liệu cũ đã được thay bằng bài thử này; chương trình không sinh số liệu mô phỏng.
 
 ## Nối dây
 
-| Blue Pill | Khối analog / module MAX3485 |
+| Blue Pill | Khối analog / module MAX13487E |
 |---|---|
 | PA0 | ADC_CURRENT |
 | PA1 | ADC_LIGHT sau hai tầng RC cố định |
 | PA9/TX | RXD (DI) |
-| PA10/RX | TXD (RO) |
-| PB0 | EN (DE và /RE nối chung) |
-| 3V3, GND | VCC, GND module MAX3485 |
+| PA10/RX | Để hở; node chỉ phát trong bài thử này |
+| PB0 | Để hở; module tự chuyển chiều |
+| GND | GND module và GND nguồn |
+| Nguồn 5 V DC | VCC module; kiểm tra nguồn tại IC trong dải 4,75–5,25 V |
 
-| Gateway ESP32 | Module MAX13487E thực đang dùng |
+TXD/RO module MAX13487E để hở trong bài thử node chỉ phát. Không nối chân 3V3 vào VCC module. [Datasheet MAX13487E](https://www.analog.com/media/en/technical-documentation/data-sheets/max13487e-max13488e.pdf).
+
+| Module MAX13487E node | USB–RS485 CH340 |
 |---|---|
-| GPIO17/TX2 | RXD (DI), theo cách nối đã chốt |
-| GPIO16/RX2 | TXD (RO), theo cách nối đã chốt |
-| GND | GND |
+| A | A |
+| B | B |
 
-Gateway MAX13487E dùng bo điều khiển chiều tự động; code không điều khiển GPIO21/EN. MAX13487E là IC nguồn 5 V; cấp nguồn **theo bo thực** và xác nhận TXD/RO phù hợp đầu vào 3,3 V của ESP32. Mã IC không chứng minh bo đã có chuyển mức. Không đấu mặc định VCC=3V3 như MAX3485, không tự thêm termination/bias rời khi chưa kiểm bo. [Datasheet MAX13487E](https://www.analog.com/media/en/technical-documentation/data-sheets/max13487e-max13488e.pdf).
-
-Nối A–A, B–B, GND–GND giữa hai module. Node nhận adapter riêng, gateway lấy nguồn USB laptop. Không cần bộ USB–RS485 CH340.
+Adapter hiện có hai cọc A/B: chỉ nối hai dây A/B. GND module nối GND Blue Pill và GND nguồn cấp node. Node nhận adapter nguồn 5 V riêng; USB–RS485 cắm vào laptop.
 
 ## Nạp chương trình
 
 1. Node: mở thư mục này bằng PlatformIO trong VS Code; cắm ST-Link, chọn `bluepill_f103c8`, Upload. Hoặc chạy `pio run -e bluepill_f103c8 -t upload`.
-2. Gateway: code nằm trong `src/gateway.cpp`; cắm ESP32, chọn môi trường PlatformIO `gateway_esp32` và đúng COM, Upload. Hoặc chạy `pio run -e gateway_esp32 -t upload`.
-3. ESP32 riêng tạo chớp LED tiếp tục dùng code GPIO23: HIGH 10 ms, LOW 190 ms; LED đỏ mắc nối tiếp 330 Ω.
+2. ESP32 riêng tạo chớp LED tiếp tục dùng code GPIO23: HIGH 10 ms, LOW 190 ms; LED đỏ mắc nối tiếp 330 Ω.
 
 ## Chuẩn bị một lần trước phiên
 
@@ -60,9 +59,9 @@ python -m pip install -r requirements.txt
 python tools/capture_module.py
 ```
 
-Nếu `python` của máy không có pip, dùng Python đã cài pyserial (ví dụ môi trường `.venv` có sẵn). Chọn 1/2/3/4, chọn **COM của gateway**, đặt đúng tải/LED rồi nhấn Enter. Đóng Arduino Serial Monitor/PlatformIO Monitor trước khi chạy vì chúng không dùng chung COM với Python.
+Nếu `python` của máy không có pip, dùng Python đã cài pyserial (ví dụ môi trường `.venv` có sẵn). Chọn 1/2/3/4, chọn **COM của USB–RS485 CH340**, đặt đúng tải/LED rồi nhấn Enter. Đóng Arduino Serial Monitor/PlatformIO Monitor trước khi chạy vì chúng không dùng chung COM với Python.
 
-Hoặc chạy chỉ định (thay COM3 bằng COM gateway thực):
+Hoặc chạy chỉ định (thay COM3 bằng COM USB–RS485 thực):
 
 ```powershell
 python tools/capture_module.py 1 --port COM3
@@ -80,6 +79,17 @@ Python `.venv` có sẵn trong dự án đã có pyserial 3.5. Có thể chạy 
 ```
 
 Các file `tools/capture_bpw34.py`, `tools/analyze_bpw34.py` và `docs/bpw34_test.md` là công cụ/tài liệu cũ còn giữ, không dùng cho bài thử mới. Số liệu BPW34 cũ đã xóa theo yêu cầu; kết quả mới chỉ nằm trong `data/module/`.
+## Xem trực tiếp và lưu CSV
+
+Để chỉ xem gói dữ liệu, liệt kê cổng rồi mở COM của USB–RS485 (thay COM3 bằng cổng thực):
+
+```powershell
+& "C:\Users\Lenovo\.platformio\penv\Scripts\python.exe" -m serial.tools.list_ports
+& "C:\Users\Lenovo\.platformio\penv\Scripts\python.exe" -m serial.tools.miniterm COM3 115200
+```
+
+Node chạy `bluepill_f103c8` gửi gói `DATA,...*XX` mỗi giây. Thoát miniterm bằng Ctrl+]. Để vừa hiển thị số liệu dễ đọc vừa lưu CSV, chạy `capture_module.py` ở trên; đóng miniterm trước vì hai chương trình không dùng chung COM.
+
 ## Sáu cột CSV
 
 | Cột | Nội dung |
@@ -99,4 +109,4 @@ Node gửi checksum và số thứ tự nội bộ. Python dừng khi sai khung,
 
 ## Giới hạn xác nhận
 
-Build và kiểm thử bằng dữ liệu tổng hợp chỉ kiểm logic/phần mềm. Chưa có kết quả đo thực của bộ mới. Phải nạp lên hai bo và chạy đủ bốn trường hợp để kiểm phần cứng, mức UART MAX13487E, độ ổn định lấy mẫu và ngưỡng quang trước khi hàn PCB.
+Build và kiểm thử bằng dữ liệu tổng hợp chỉ kiểm logic/phần mềm. Chưa có kết quả đo thực của bộ mới. Nạp chương trình đo lên node và chạy đủ bốn trường hợp qua USB–RS485 để kiểm phần cứng, nguồn MAX13487E, độ ổn định lấy mẫu và ngưỡng quang trước khi hàn PCB.
